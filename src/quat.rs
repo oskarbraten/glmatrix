@@ -1,5 +1,5 @@
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign};
-use super::Vec3;
+use super::{Vec3, Vec4};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Quat {
@@ -145,6 +145,15 @@ impl Mul<Vec3> for Quat {
     type Output = Vec3;
     
     fn mul(self, mut other: Vec3) -> Vec3 {
+        other.rotate_quat(self);
+        other
+    }
+}
+
+impl Mul<Vec4> for Quat {
+    type Output = Vec4;
+    
+    fn mul(self, mut other: Vec4) -> Vec4 {
         other.rotate_quat(self);
         other
     }
