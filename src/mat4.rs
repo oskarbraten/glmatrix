@@ -1,28 +1,29 @@
+use num::Float;
 use std::convert::From;
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign};
 use super::{Vec3, Vec4, Quat};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Mat4 {
-    pub elements: [f32; 16]
+pub struct Mat4<T> {
+    pub elements: [T; 16]
 }
 
-impl Mat4 {
-    pub const fn new(m00: f32, m01: f32, m02: f32, m03: f32, m10: f32, m11: f32, m12: f32, m13: f32, m20: f32, m21: f32, m22: f32, m23: f32, m30: f32, m31: f32, m32: f32, m33: f32) -> Self {
+impl<T: Float + MulAssign> Mat4<T> {
+    pub fn new(m00: T, m01: T, m02: T, m03: T, m10: T, m11: T, m12: T, m13: T, m20: T, m21: T, m22: T, m23: T, m30: T, m31: T, m32: T, m33: T) -> Self {
         Self {
             elements: [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]
         }
     }
 
-    pub const fn identity() -> Self {
+    pub fn identity() -> Self {
         let mut m = Self {
-            elements: [0.0; 16]
+            elements: [T::zero(); 16]
         };
         
-        m.elements[0] = 1.0;
-        m.elements[5] = 1.0;
-        m.elements[10] = 1.0;
-        m.elements[15] = 1.0;
+        m.elements[0] = T::one();
+        m.elements[5] = T::one();
+        m.elements[10] = T::one();
+        m.elements[15] = T::one();
         
         m
     }
@@ -48,8 +49,8 @@ impl Mat4 {
         )
     }
         
-    pub fn determinant(&self) -> f32 {
-        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = &self.elements;
+    pub fn determinant(&self) -> T {
+        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
         
         let b00 = a00 * a11 - a01 * a10;
         let b01 = a00 * a12 - a02 * a10;
@@ -68,7 +69,7 @@ impl Mat4 {
     }
     
     pub fn inverse(&self) -> Self {
-        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = &self.elements;
+        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
         
         let b00 = a00 * a11 - a01 * a10;
         let b01 = a00 * a12 - a02 * a10;
@@ -83,7 +84,7 @@ impl Mat4 {
         let b10 = a21 * a33 - a23 * a31;
         let b11 = a22 * a33 - a23 * a32;
         
-        let inverse_det = 1.0 / (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
+        let inverse_det = T::one() / (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
         
         Self::new(
             (a11 * b11 - a12 * b10 + a13 * b09) * inverse_det,
@@ -106,7 +107,7 @@ impl Mat4 {
     }
 
     pub fn adjoint(&self) -> Self {
-        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = &self.elements;
+        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
     
         Self::new(
             a11 * (a22 * a33 - a23 * a32) - a21 * (a12 * a33 - a13 * a32) + a31 * (a12 * a23 - a13 * a22),
@@ -128,8 +129,8 @@ impl Mat4 {
         )
     }
 
-    pub fn translate(mut self, v: Vec3) -> Self {
-        let [x, y, z] = &v.elements;
+    pub fn translate(mut self, v: Vec3<T>) -> Self {
+        let [x, y, z] = v.elements;
 
         self.elements[12] = self.elements[0] * x + self.elements[4] * y + self.elements[8] * z + self.elements[12];
         self.elements[13] = self.elements[1] * x + self.elements[5] * y + self.elements[9] * z + self.elements[13];
@@ -139,8 +140,8 @@ impl Mat4 {
         self
     }
 
-    pub fn scale(mut self, v: Vec3) -> Self {
-        let [x, y, z] = &v.elements;
+    pub fn scale(mut self, v: Vec3<T>) -> Self {
+        let [x, y, z] = v.elements;
 
         self.elements[0] = self.elements[0] * x;
         self.elements[1] = self.elements[1] * x;
@@ -158,11 +159,11 @@ impl Mat4 {
         self
     }
 
-    pub fn get_translation(&self) -> Vec3 {
+    pub fn get_translation(&self) -> Vec3<T> {
         Vec3::new(self.elements[12], self.elements[13], self.elements[14])
     }
 
-    pub fn get_scaling(&self) -> Vec3 {
+    pub fn get_scaling(&self) -> Vec3<T> {
         Vec3::new(
             (self.elements[0].powi(2) + self.elements[2].powi(2) + self.elements[3].powi(2)).sqrt(),
             (self.elements[4].powi(2) + self.elements[5].powi(2) + self.elements[6].powi(2)).sqrt(),
@@ -170,12 +171,12 @@ impl Mat4 {
         )
     }
 
-    pub fn get_rotation(&self) -> Quat {
+    pub fn get_rotation(&self) -> Quat<T> {
         unimplemented!()
     }
 
-    pub fn from_rotation(r: Quat) -> Self {
-        let [x, y, z, w] = &r.elements;
+    pub fn from_rotation(r: Quat<T>) -> Self {
+        let [x, y, z, w] = r.elements;
     
         let x2 = x + x;
         let y2 = y + y;
@@ -191,69 +192,69 @@ impl Mat4 {
         let wz = w * z2;
     
         Self::new(
-            1.0 - yy - zz,
+            T::one() - yy - zz,
             yx + wz,
             zx - wy,
-            0.0,
+            T::zero(),
             yx - wz,
-            1.0 - xx - zz,
+            T::one() - xx - zz,
             zy + wx,
-            0.0,
+            T::zero(),
             zx + wy,
             zy - wx,
-            1.0 - xx - yy,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0
+            T::one() - xx - yy,
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::one()
         )
     }
 
-    pub fn from_translation(t: Vec3) -> Self {
+    pub fn from_translation(t: Vec3<T>) -> Self {
         Self::new(
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            0.0,
+            T::one(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::one(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::one(),
+            T::zero(),
             t.x(),
             t.y(),
             t.z(),
-            1.0
+            T::one()
         )
     }
 
-    pub fn from_scaling(s: Vec3) -> Self {
+    pub fn from_scaling(s: Vec3<T>) -> Self {
         Self::new(
             s.x(),
-            0.0,
-            0.0,
-            0.0,
-            0.0,
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
             s.y(),
-            0.0,
-            0.0,
-            0.0,
-            0.0,
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
             s.z(),
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::one()
         )
     }
 
-    pub fn from_rotation_translation_scale(r: Quat, t: Vec3, s: Vec3) -> Self {
-        let [x, y, z, w] = &r.elements;
+    pub fn from_rotation_translation_scale(r: Quat<T>, t: Vec3<T>, s: Vec3<T>) -> Self {
+        let [x, y, z, w] = r.elements;
     
         let x2 = x + x;
         let y2 = y + y;
@@ -274,92 +275,92 @@ impl Mat4 {
         let sz = s.z();
     
         Self::new(
-            (1.0 - (yy + zz)) * sx,
+            (T::one() - (yy + zz)) * sx,
             (xy + wz) * sx,
             (xz - wy) * sx,
-            0.0,
+            T::zero(),
             (xy - wz) * sy,
-            (1.0 - (xx + zz)) * sy,
+            (T::one() - (xx + zz)) * sy,
             (yz + wx) * sy,
-            0.0,
+            T::zero(),
             (xz + wy) * sz,
             (yz - wx) * sz,
-            (1.0 - (xx + yy)) * sz,
-            0.0,
+            (T::one() - (xx + yy)) * sz,
+            T::zero(),
             t.x(),
             t.y(),
             t.z(),
-            1.0
+            T::one()
         )
     }
 
-    pub fn perspective(fovy: f32, aspect: f32, near: f32, far: f32) -> Self {
-        let f = 1.0 / (fovy / 2.0).tan();
+    pub fn perspective(fovy: T, aspect: T, near: T, far: T) -> Self {
+        let f = T::one() / (fovy / (T::one() + T::one())).tan();
         let mut m = Self::new(
             f / aspect,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
             f,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            -1.0,
-            -1.0,
-            0.0,
-            0.0,
-            -2.0 * near,
-            0.0
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            -T::one(),
+            -T::one(),
+            T::zero(),
+            T::zero(),
+            -(T::one() + T::one()) * near,
+            T::zero()
         );
     
-        if far != std::f32::INFINITY {
-            let nf = 1.0 / (near - far);
+        if far != T::infinity() {
+            let nf = T::one() / (near - far);
             m.elements[10] = (far + near) * nf;
-            m.elements[14] = 2.0 * far * near * nf;
+            m.elements[14] = (T::one() + T::one()) * far * near * nf;
         }
 
         m
     }
 
-    pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
-        let lr = 1.0 / (left - right);
-        let bt = 1.0 / (bottom - top);
-        let nf = 1.0 / (near - far);
+    pub fn ortho(left: T, right: T, bottom: T, top: T, near: T, far: T) -> Self {
+        let lr = T::one() / (left - right);
+        let bt = T::one() / (bottom - top);
+        let nf = T::one() / (near - far);
 
         Self::new(
-            -2.0 * lr,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            -2.0 * bt,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            2.0 * nf,
-            0.0,
+            -(T::one() + T::one()) * lr,
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            -(T::one() + T::one()) * bt,
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            T::zero(),
+            (T::one() + T::one()) * nf,
+            T::zero(),
             (left + right) * lr,
             (top + bottom) * bt,
             (far + near) * nf,
-            1.0
+            T::one()
         )
     }
 
 
 }
 
-impl From<[f32; 16]> for Mat4 {
-    fn from(elements: [f32; 16]) -> Self {
+impl<T: Float + MulAssign> From<[T; 16]> for Mat4<T> {
+    fn from(elements: [T; 16]) -> Self {
         Self {
             elements
         }
     }
 }
 
-impl Add for Mat4 {
+impl<T: Float + MulAssign> Add for Mat4<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -384,7 +385,7 @@ impl Add for Mat4 {
     }
 }
 
-impl AddAssign for Mat4 {
+impl<T: Float + MulAssign + AddAssign> AddAssign for Mat4<T> {
     fn add_assign(&mut self, other: Self) {
         self.elements[0] += other.elements[0];
         self.elements[1] += other.elements[1];
@@ -405,7 +406,7 @@ impl AddAssign for Mat4 {
     }
 }
 
-impl Sub for Mat4 {
+impl<T: Float + MulAssign> Sub for Mat4<T> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -430,7 +431,7 @@ impl Sub for Mat4 {
     }
 }
 
-impl SubAssign for Mat4 {
+impl<T: Float + MulAssign + SubAssign> SubAssign for Mat4<T> {
     fn sub_assign(&mut self, other: Self) {
         self.elements[0] -= other.elements[0];
         self.elements[1] -= other.elements[1];
@@ -451,12 +452,12 @@ impl SubAssign for Mat4 {
     }
 }
 
-impl Mul for Mat4 {
+impl<T: Float + MulAssign> Mul for Mat4<T> {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
-        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = &self.elements;
-        let [b00, b01, b02, b03, b10, b11, b12, b13, b20, b21, b22, b23, b30, b31, b32, b33] = &other.elements;
+        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
+        let [b00, b01, b02, b03, b10, b11, b12, b13, b20, b21, b22, b23, b30, b31, b32, b33] = other.elements;
 
         Self::new(
             b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
@@ -479,10 +480,10 @@ impl Mul for Mat4 {
     }
 }
 
-impl MulAssign for Mat4 {
+impl<T: Float + MulAssign> MulAssign for Mat4<T> {
     fn mul_assign(&mut self, other: Self) {
         let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
-        let [b00, b01, b02, b03, b10, b11, b12, b13, b20, b21, b22, b23, b30, b31, b32, b33] = &other.elements;
+        let [b00, b01, b02, b03, b10, b11, b12, b13, b20, b21, b22, b23, b30, b31, b32, b33] = other.elements;
 
         self.elements[0] = b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30;
         self.elements[1] = b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31;
@@ -504,10 +505,10 @@ impl MulAssign for Mat4 {
 }
 
 
-impl Mul<Vec4> for Mat4 {
-    type Output = Vec4;
+impl<T: Float + MulAssign> Mul<Vec4<T>> for Mat4<T> {
+    type Output = Vec4<T>;
     
-    fn mul(self, other: Vec4) -> Vec4 {
+    fn mul(self, other: Vec4<T>) -> Vec4<T> {
         let m = &self.elements;
         Vec4::new(
             m[0] * other.x() + m[4] * other.y() + m[8] * other.z() + m[12] * other.w(),
@@ -523,15 +524,8 @@ impl Mul<Vec4> for Mat4 {
 mod tests {
     use super::*;
 
-    const mat_a: Mat4 = Mat4::identity();
-
-
-
-    #[test]
-    fn transpose() {
-
-        
-
-        assert_eq!(2 + 2, 4);
-    }
+    // #[test]
+    // fn transpose() {
+    //     assert_eq!(2 + 2, 4);
+    // }
 }

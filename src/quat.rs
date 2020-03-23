@@ -1,24 +1,25 @@
+use num::Float;
 use std::ops::{Mul, MulAssign};
 use super::{Vec3, Vec4};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Quat {
-    pub elements: [f32; 4]
+pub struct Quat<T: Float> {
+    pub elements: [T; 4]
 }
 
-impl Quat {
-    pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+impl<T: Float + MulAssign> Quat<T> {
+    pub fn new(x: T, y: T, z: T, w: T) -> Self {
         Self {
             elements: [x, y, z, w]
         }
     }
     
-    pub const fn identity() -> Self {
-        Self::new(0.0, 0.0, 0.0, 1.0)
+    pub fn identity() -> Self {
+        Self::new(T::zero(), T::zero(), T::zero(), T::one())
     }
     
-    pub fn from_euler(mut x: f32, mut y: f32, mut z: f32) -> Self {
-        let half_to_rad = (0.5 * std::f32::consts::PI) / 180.0;
+    pub fn from_euler(mut x: T, mut y: T, mut z: T) -> Self {
+        let half_to_rad = T::from((0.5 * std::f64::consts::PI) / 180.0).unwrap();
         
         x *= half_to_rad;
         y *= half_to_rad;
@@ -34,40 +35,40 @@ impl Quat {
         Self::new(sx * cy * cz - cx * sy * sz, cx * sy * cz + sx * cy * sz, cx * cy * sz - sx * sy * cz, cx * cy * sz - sx * sy * cz)
     }
     
-    pub fn from_axis_angle(axis: &Vec3, mut rad: f32) -> Self {
-        rad *= 0.5;
+    pub fn from_axis_angle(axis: &Vec3<T>, mut rad: T) -> Self {
+        rad *= T::from(0.5).unwrap();
         let sin = rad.sin();
         Self::new(axis.elements[0] * sin, axis.elements[1] * sin, axis.elements[2] * sin, rad.cos())
     }
     
-    pub fn get_axis_angle(&self) -> (Vec3, f32) {
+    pub fn get_axis_angle(&self) -> (Vec3<T>, T) {
         let acos = self.elements[3].acos();
-        let rad = acos * 2.0;
+        let rad = acos * (T::one() + T::one());
         let sin = acos.sin();
         
-        if sin > 0.0 {
+        if sin > T::zero() {
             (Vec3::new(self.elements[0] / sin, self.elements[1] / sin, self.elements[2] / sin), rad)
         } else {
-            (Vec3::new(1.0, 0.0, 0.0), rad)
+            (Vec3::new(T::one(), T::one(), T::one()), rad)
         }
     }
     
-    pub fn dot(&self, other: &Quat) -> f32 {
+    pub fn dot(&self, other: &Quat<T>) -> T {
         self.elements[0] * other.elements[0] + self.elements[1] * other.elements[1] + self.elements[2] * other.elements[2] + self.elements[3] * other.elements[3]
     }
     
-    pub fn angle(&self, other: &Self) -> f32 {
+    pub fn angle(&self, other: &Self) -> T {
         let dot = self.dot(other);
-        (2.0 * dot * dot - 1.0).acos()
+        ((T::one() + T::one()) * dot * dot - T::one()).acos()
     }
     
     pub fn inverse(&self) -> Self {
         let dot = self.dot(self);
         
-        if dot == 0.0 {
-            Self::new(0.0, 0.0, 0.0, 0.0)
+        if dot == T::zero() {
+            Self::new(T::zero(), T::zero(), T::zero(), T::zero())
         } else {
-            let inverse_dot = 1.0 / dot;
+            let inverse_dot = T::one() / dot;
             
             Self::new(-self.elements[0] * inverse_dot, -self.elements[1] * inverse_dot, -self.elements[2] * inverse_dot, -self.elements[3] * inverse_dot,)
         }
@@ -77,18 +78,18 @@ impl Quat {
         Self::new(-self.elements[0], -self.elements[1], -self.elements[2], self.elements[3])
     }
     
-    pub fn length_squared(&self) -> f32 {
+    pub fn length_squared(&self) -> T {
         self.elements[0].powi(2) + self.elements[1].powi(2) + self.elements[2].powi(2) + self.elements[3].powi(2)
     }
     
-    pub fn length(&self) -> f32 {
+    pub fn length(&self) -> T {
         self.length_squared().sqrt()
     }
     
     pub fn normalize(&mut self) {
         let mut ls = self.length_squared();
-        if ls > 0.0 {
-            ls = 1.0 / ls.sqrt();
+        if ls > T::zero() {
+            ls = T::one() / ls.sqrt();
         }
         
         self.elements[0] *= ls;
@@ -99,20 +100,20 @@ impl Quat {
     
     pub fn normalized(&self) -> Self {
         let mut ls = self.length_squared();
-        if ls > 0.0 {
-            ls = 1.0 / ls.sqrt();
+        if ls > T::zero() {
+            ls = T::one() / ls.sqrt();
         }
         
         Self::new(self.elements[0] * ls, self.elements[1] * ls, self.elements[2] * ls, self.elements[3] * ls)
     }
 }
 
-impl Mul for Quat {
+impl<T: Float + MulAssign> Mul for Quat<T> {
     type Output = Self;
     
     fn mul(self, other: Self) -> Self {
-        let [ax, ay, az, aw] = &self.elements;
-        let [bx, by, bz, bw] = &other.elements;
+        let [ax, ay, az, aw] = self.elements;
+        let [bx, by, bz, bw] = other.elements;
 
         Self::new(
             ax * bw + aw * bx + ay * bz - az * by,
@@ -123,10 +124,10 @@ impl Mul for Quat {
     }
 }
 
-impl MulAssign for Quat {
+impl<T: Float + MulAssign> MulAssign for Quat<T> {
     fn mul_assign(&mut self, other: Self) {
-        let [ax, ay, az, aw] = &self.elements;
-        let [bx, by, bz, bw] = &other.elements;
+        let [ax, ay, az, aw] = self.elements;
+        let [bx, by, bz, bw] = other.elements;
         
         let x = ax * bw + aw * bx + ay * bz - az * by;
         let y = ay * bw + aw * by + az * bx - ax * bz;
@@ -141,19 +142,19 @@ impl MulAssign for Quat {
 }
 
 /// Shorthand for v.rotate_quat(...)
-impl Mul<Vec3> for Quat {
-    type Output = Vec3;
+impl<T: Float + MulAssign> Mul<Vec3<T>> for Quat<T> {
+    type Output = Vec3<T>;
     
-    fn mul(self, mut other: Vec3) -> Vec3 {
+    fn mul(self, mut other: Vec3<T>) -> Vec3<T> {
         other.rotate_quat(self);
         other
     }
 }
 
-impl Mul<Vec4> for Quat {
-    type Output = Vec4;
+impl<T: Float + MulAssign> Mul<Vec4<T>> for Quat<T> {
+    type Output = Vec4<T>;
     
-    fn mul(self, mut other: Vec4) -> Vec4 {
+    fn mul(self, mut other: Vec4<T>) -> Vec4<T> {
         other.rotate_quat(self);
         other
     }
