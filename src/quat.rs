@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign};
+use std::ops::{Mul, MulAssign};
 use super::{Vec3, Vec4};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -7,13 +7,13 @@ pub struct Quat {
 }
 
 impl Quat {
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+    pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self {
             elements: [x, y, z, w]
         }
     }
     
-    pub fn identity() -> Self {
+    pub const fn identity() -> Self {
         Self::new(0.0, 0.0, 0.0, 1.0)
     }
     

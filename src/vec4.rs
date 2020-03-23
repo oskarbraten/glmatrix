@@ -7,19 +7,19 @@ pub struct Vec4 {
 }
 
 impl Vec4 {
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+    pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self {
             elements: [x, y, z, w]
         }
     }
 
-    pub fn zero() -> Self {
+    pub const fn zero() -> Self {
         Self {
             elements: [0.0; 4]
         }
     }
 
-    pub fn one() -> Self {
+    pub const fn one() -> Self {
         Self {
             elements: [1.0; 4]
         }

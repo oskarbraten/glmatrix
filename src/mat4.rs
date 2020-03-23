@@ -1,5 +1,5 @@
 use std::convert::From;
-use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign};
+use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign};
 use super::{Vec3, Vec4, Quat};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -8,13 +8,13 @@ pub struct Mat4 {
 }
 
 impl Mat4 {
-    pub fn new(m00: f32, m01: f32, m02: f32, m03: f32, m10: f32, m11: f32, m12: f32, m13: f32, m20: f32, m21: f32, m22: f32, m23: f32, m30: f32, m31: f32, m32: f32, m33: f32) -> Self {
+    pub const fn new(m00: f32, m01: f32, m02: f32, m03: f32, m10: f32, m11: f32, m12: f32, m13: f32, m20: f32, m21: f32, m22: f32, m23: f32, m30: f32, m31: f32, m32: f32, m33: f32) -> Self {
         Self {
             elements: [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]
         }
     }
 
-    pub fn identity() -> Self {
+    pub const fn identity() -> Self {
         let mut m = Self {
             elements: [0.0; 16]
         };
@@ -292,6 +292,63 @@ impl Mat4 {
             1.0
         )
     }
+
+    pub fn perspective(fovy: f32, aspect: f32, near: f32, far: f32) -> Self {
+        let f = 1.0 / (fovy / 2.0).tan();
+        let mut m = Self::new(
+            f / aspect,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            f,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            -1.0,
+            0.0,
+            0.0,
+            -2.0 * near,
+            0.0
+        );
+    
+        if far != std::f32::INFINITY {
+            let nf = 1.0 / (near - far);
+            m.elements[10] = (far + near) * nf;
+            m.elements[14] = 2.0 * far * near * nf;
+        }
+
+        m
+    }
+
+    pub fn ortho(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
+        let lr = 1.0 / (left - right);
+        let bt = 1.0 / (bottom - top);
+        let nf = 1.0 / (near - far);
+
+        Self::new(
+            -2.0 * lr,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -2.0 * bt,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            2.0 * nf,
+            0.0,
+            (left + right) * lr,
+            (top + bottom) * bt,
+            (far + near) * nf,
+            1.0
+        )
+    }
+
+
 }
 
 impl From<[f32; 16]> for Mat4 {
@@ -299,6 +356,98 @@ impl From<[f32; 16]> for Mat4 {
         Self {
             elements
         }
+    }
+}
+
+impl Add for Mat4 {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self::new(
+            self.elements[0] + other.elements[0],
+            self.elements[1] + other.elements[1],
+            self.elements[2] + other.elements[2],
+            self.elements[3] + other.elements[3],
+            self.elements[4] + other.elements[4],
+            self.elements[5] + other.elements[5],
+            self.elements[6] + other.elements[6],
+            self.elements[7] + other.elements[7],
+            self.elements[8] + other.elements[8],
+            self.elements[9] + other.elements[9],
+            self.elements[10] + other.elements[10],
+            self.elements[11] + other.elements[11],
+            self.elements[12] + other.elements[12],
+            self.elements[13] + other.elements[13],
+            self.elements[14] + other.elements[14],
+            self.elements[15] + other.elements[15]
+        )
+    }
+}
+
+impl AddAssign for Mat4 {
+    fn add_assign(&mut self, other: Self) {
+        self.elements[0] += other.elements[0];
+        self.elements[1] += other.elements[1];
+        self.elements[2] += other.elements[2];
+        self.elements[3] += other.elements[3];
+        self.elements[4] += other.elements[4];
+        self.elements[5] += other.elements[5];
+        self.elements[6] += other.elements[6];
+        self.elements[7] += other.elements[7];
+        self.elements[8] += other.elements[8];
+        self.elements[9] += other.elements[9];
+        self.elements[10] += other.elements[10];
+        self.elements[11] += other.elements[11];
+        self.elements[12] += other.elements[12];
+        self.elements[13] += other.elements[13];
+        self.elements[14] += other.elements[14];
+        self.elements[15] += other.elements[15];
+    }
+}
+
+impl Sub for Mat4 {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self::new(
+            self.elements[0] - other.elements[0],
+            self.elements[1] - other.elements[1],
+            self.elements[2] - other.elements[2],
+            self.elements[3] - other.elements[3],
+            self.elements[4] - other.elements[4],
+            self.elements[5] - other.elements[5],
+            self.elements[6] - other.elements[6],
+            self.elements[7] - other.elements[7],
+            self.elements[8] - other.elements[8],
+            self.elements[9] - other.elements[9],
+            self.elements[10] - other.elements[10],
+            self.elements[11] - other.elements[11],
+            self.elements[12] - other.elements[12],
+            self.elements[13] - other.elements[13],
+            self.elements[14] - other.elements[14],
+            self.elements[15] - other.elements[15]
+        )
+    }
+}
+
+impl SubAssign for Mat4 {
+    fn sub_assign(&mut self, other: Self) {
+        self.elements[0] -= other.elements[0];
+        self.elements[1] -= other.elements[1];
+        self.elements[2] -= other.elements[2];
+        self.elements[3] -= other.elements[3];
+        self.elements[4] -= other.elements[4];
+        self.elements[5] -= other.elements[5];
+        self.elements[6] -= other.elements[6];
+        self.elements[7] -= other.elements[7];
+        self.elements[8] -= other.elements[8];
+        self.elements[9] -= other.elements[9];
+        self.elements[10] -= other.elements[10];
+        self.elements[11] -= other.elements[11];
+        self.elements[12] -= other.elements[12];
+        self.elements[13] -= other.elements[13];
+        self.elements[14] -= other.elements[14];
+        self.elements[15] -= other.elements[15];
     }
 }
 
@@ -366,5 +515,23 @@ impl Mul<Vec4> for Mat4 {
             m[2] * other.x() + m[6] * other.y() + m[10] * other.z() + m[14] * other.w(),
             m[3] * other.x() + m[7] * other.y() + m[11] * other.z() + m[15] * other.w()
         )
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const mat_a: Mat4 = Mat4::identity();
+
+
+
+    #[test]
+    fn transpose() {
+
+        
+
+        assert_eq!(2 + 2, 4);
     }
 }
