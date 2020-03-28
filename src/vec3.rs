@@ -286,3 +286,118 @@ impl<T: Float + DivAssign> DivAssign<T> for Vec3<T> {
         self.elements[2] /= other;
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new() {
+        assert_eq!(Vec3::new(0.0f32, 0.0, 0.0), Vec3 { elements: [0.0f32; 3] });
+        assert_eq!(Vec3::new(0.0f64, 0.0, 0.0), Vec3 { elements: [0.0f64; 3] });
+    }
+
+    #[test]
+    fn zero() {
+        assert_eq!(Vec3::zero(), Vec3 { elements: [0.0f32; 3] });
+        assert_eq!(Vec3::zero(), Vec3 { elements: [0.0f64; 3] });
+    }
+
+    #[test]
+    fn one() {
+        assert_eq!(Vec3::one(), Vec3 { elements: [1.0f32; 3] });
+        assert_eq!(Vec3::one(), Vec3 { elements: [1.0f64; 3] });
+    }
+
+    #[test]
+    fn getters() {
+        let v32 = Vec3::new(0.0f32, 1.0, 2.0);
+        let v64 = Vec3::new(0.0f64, 1.0, 2.0);
+
+        assert_eq!(v32.x(), 0.0);
+        assert_eq!(v32.y(), 1.0);
+        assert_eq!(v32.z(), 2.0);
+
+        assert_eq!(v64.x(), 0.0);
+        assert_eq!(v64.y(), 1.0);
+        assert_eq!(v64.z(), 2.0);
+    }
+
+    #[test]
+    fn setters() {
+        let mut v = Vec3::new(0.0f32, 1.0, 2.0);
+
+        assert_eq!(v.x(), 0.0);
+        v.set_x(1.0);
+        assert_eq!(v.x(), 1.0);
+
+        assert_eq!(v.y(), 1.0);
+        v.set_y(2.0);
+        assert_eq!(v.y(), 2.0);
+
+        assert_eq!(v.z(), 2.0);
+        v.set_z(3.0);
+        assert_eq!(v.z(), 3.0);
+    }
+
+    #[test]
+    fn length_squared() {
+        let v = Vec3::new(4.0, 0.0, 3.0);
+        assert_eq!(v.length_squared(), 25.0);
+    }
+
+    #[test]
+    fn length() {
+        let v = Vec3::new(4.0, 0.0, 3.0);
+        assert_eq!(v.length(), ((4.0*4.0)+(3.0*3.0)).sqrt());
+    }
+
+    #[test]
+    fn dist_squared() {
+        let v1 = Vec3::new(0.0, 0.0, 0.0);
+        let v2 = Vec3::new(4.0, 0.0, 3.0);
+        assert_eq!(v1.dist_squared(&v2), 25.0);
+    }
+
+    #[test]
+    fn dist() {
+        let v1 = Vec3::new(0.0, 0.0, 0.0);
+        let v2 = Vec3::new(4.0, 0.0, 3.0);
+        assert_eq!(v1.dist(&v2), 5.0);
+    }
+
+    #[test]
+    fn invert() {
+        let mut v = Vec3::new(1.0, 2.0, 3.0);
+        v.invert();
+        assert_eq!(v, Vec3::new(1.0 / 1.0, 1.0 / 2.0, 1.0 / 3.0));
+    }
+
+    #[test]
+    fn inverse() {
+        let v = Vec3::new(1.0, 2.0, 3.0);
+        assert_eq!(v.inverse(), Vec3::new(1.0 / 1.0, 1.0 / 2.0, 1.0 / 3.0));
+    }
+
+    #[test]
+    fn normalize() {
+        let mut v = Vec3::new(2.0, 0.0, 0.0);
+        v.normalize();
+
+        assert_eq!(v, Vec3::new(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn normalized() {
+        let v = Vec3::new(2.0, 0.0, 0.0);
+        assert_eq!(v.normalized(), Vec3::new(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn dot() {
+        let v1 = Vec3::new(2.0, 2.0, 2.0);
+        let v2 = Vec3::new(2.0, 2.0, 2.0);
+        assert_eq!(v1.dot(&v2), 4.0 + 4.0 + 4.0);
+    }
+}
