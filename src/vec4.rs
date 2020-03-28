@@ -7,7 +7,7 @@ pub struct Vec4<T: Float> {
     pub elements: [T; 4]
 }
 
-impl<T: Float + MulAssign> Vec4<T> {
+impl<T: Float> Vec4<T> {
     pub fn new(x: T, y: T, z: T, w: T) -> Self {
         Self {
             elements: [x, y, z, w]
@@ -103,10 +103,10 @@ impl<T: Float + MulAssign> Vec4<T> {
             ls = T::one() / ls.sqrt();
         }
 
-        self.elements[0] *= ls;
-        self.elements[1] *= ls;
-        self.elements[2] *= ls;
-        self.elements[3] *= ls;
+        self.elements[0] = self.elements[0] * ls;
+        self.elements[1] = self.elements[1] * ls;
+        self.elements[2] = self.elements[2] * ls;
+        self.elements[3] = self.elements[3] * ls;
     }
 
     pub fn normalized(&self) -> Self {
@@ -151,7 +151,7 @@ impl<T: Float + MulAssign> Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Add for Vec4<T> {
+impl<T: Float> Add for Vec4<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -164,7 +164,7 @@ impl<T: Float + MulAssign> Add for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign + AddAssign> AddAssign for Vec4<T> {
+impl<T: Float + AddAssign> AddAssign for Vec4<T> {
     fn add_assign(&mut self, other: Self) {
         self.elements[0] += other.elements[0];
         self.elements[1] += other.elements[1];
@@ -173,7 +173,7 @@ impl<T: Float + MulAssign + AddAssign> AddAssign for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Sub for Vec4<T> {
+impl<T: Float> Sub for Vec4<T> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -186,7 +186,7 @@ impl<T: Float + MulAssign> Sub for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign + SubAssign> SubAssign for Vec4<T> {
+impl<T: Float + SubAssign> SubAssign for Vec4<T> {
     fn sub_assign(&mut self, other: Self) {
         self.elements[0] -= other.elements[0];
         self.elements[1] -= other.elements[1];
@@ -195,7 +195,7 @@ impl<T: Float + MulAssign + SubAssign> SubAssign for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Neg for Vec4<T> {
+impl<T: Float> Neg for Vec4<T> {
     type Output = Self;
 
     fn neg(self) -> Self {
@@ -208,7 +208,7 @@ impl<T: Float + MulAssign> Neg for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Mul for Vec4<T> {
+impl<T: Float> Mul for Vec4<T> {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
@@ -230,7 +230,7 @@ impl<T: Float + MulAssign> MulAssign for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Mul<T> for Vec4<T> {
+impl<T: Float> Mul<T> for Vec4<T> {
     type Output = Self;
 
     fn mul(self, other: T) -> Self {
@@ -252,7 +252,7 @@ impl<T: Float + MulAssign> MulAssign<T> for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Div for Vec4<T> {
+impl<T: Float> Div for Vec4<T> {
     type Output = Self;
 
     fn div(self, other: Self) -> Self {
@@ -265,7 +265,7 @@ impl<T: Float + MulAssign> Div for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign + DivAssign> DivAssign for Vec4<T> {
+impl<T: Float + DivAssign> DivAssign for Vec4<T> {
     fn div_assign(&mut self, other: Self) {
         self.elements[0] /= other.elements[0];
         self.elements[1] /= other.elements[1];
@@ -274,7 +274,7 @@ impl<T: Float + MulAssign + DivAssign> DivAssign for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Div<T> for Vec4<T> {
+impl<T: Float> Div<T> for Vec4<T> {
     type Output = Vec4<T>;
 
     fn div(self, other: T) -> Self {
@@ -287,7 +287,7 @@ impl<T: Float + MulAssign> Div<T> for Vec4<T> {
     }
 }
 
-impl<T: Float + MulAssign + DivAssign> DivAssign<T> for Vec4<T> {
+impl<T: Float + DivAssign> DivAssign<T> for Vec4<T> {
     fn div_assign(&mut self, other: T) {
         self.elements[0] /= other;
         self.elements[1] /= other;

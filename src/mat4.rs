@@ -8,7 +8,7 @@ pub struct Mat4<T> {
     pub elements: [T; 16]
 }
 
-impl<T: Float + MulAssign> Mat4<T> {
+impl<T: Float> Mat4<T> {
     pub fn new(m00: T, m01: T, m02: T, m03: T, m10: T, m11: T, m12: T, m13: T, m20: T, m21: T, m22: T, m23: T, m30: T, m31: T, m32: T, m33: T) -> Self {
         Self {
             elements: [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]
@@ -352,7 +352,7 @@ impl<T: Float + MulAssign> Mat4<T> {
 
 }
 
-impl<T: Float + MulAssign> From<[T; 16]> for Mat4<T> {
+impl<T: Float> From<[T; 16]> for Mat4<T> {
     fn from(elements: [T; 16]) -> Self {
         Self {
             elements
@@ -360,7 +360,7 @@ impl<T: Float + MulAssign> From<[T; 16]> for Mat4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Add for Mat4<T> {
+impl<T: Float> Add for Mat4<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -385,7 +385,7 @@ impl<T: Float + MulAssign> Add for Mat4<T> {
     }
 }
 
-impl<T: Float + MulAssign + AddAssign> AddAssign for Mat4<T> {
+impl<T: Float + AddAssign> AddAssign for Mat4<T> {
     fn add_assign(&mut self, other: Self) {
         self.elements[0] += other.elements[0];
         self.elements[1] += other.elements[1];
@@ -406,7 +406,7 @@ impl<T: Float + MulAssign + AddAssign> AddAssign for Mat4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Sub for Mat4<T> {
+impl<T: Float> Sub for Mat4<T> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
@@ -431,7 +431,7 @@ impl<T: Float + MulAssign> Sub for Mat4<T> {
     }
 }
 
-impl<T: Float + MulAssign + SubAssign> SubAssign for Mat4<T> {
+impl<T: Float + SubAssign> SubAssign for Mat4<T> {
     fn sub_assign(&mut self, other: Self) {
         self.elements[0] -= other.elements[0];
         self.elements[1] -= other.elements[1];
@@ -452,7 +452,7 @@ impl<T: Float + MulAssign + SubAssign> SubAssign for Mat4<T> {
     }
 }
 
-impl<T: Float + MulAssign> Mul for Mat4<T> {
+impl<T: Float> Mul for Mat4<T> {
     type Output = Self;
 
     fn mul(self, other: Self) -> Self {
@@ -480,7 +480,7 @@ impl<T: Float + MulAssign> Mul for Mat4<T> {
     }
 }
 
-impl<T: Float + MulAssign> MulAssign for Mat4<T> {
+impl<T: Float> MulAssign for Mat4<T> {
     fn mul_assign(&mut self, other: Self) {
         let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
         let [b00, b01, b02, b03, b10, b11, b12, b13, b20, b21, b22, b23, b30, b31, b32, b33] = other.elements;
@@ -505,7 +505,7 @@ impl<T: Float + MulAssign> MulAssign for Mat4<T> {
 }
 
 
-impl<T: Float + MulAssign> Mul<Vec4<T>> for Mat4<T> {
+impl<T: Float> Mul<Vec4<T>> for Mat4<T> {
     type Output = Vec4<T>;
     
     fn mul(self, other: Vec4<T>) -> Vec4<T> {
@@ -517,15 +517,4 @@ impl<T: Float + MulAssign> Mul<Vec4<T>> for Mat4<T> {
             m[3] * other.x() + m[7] * other.y() + m[11] * other.z() + m[15] * other.w()
         )
     }
-}
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // #[test]
-    // fn transpose() {
-    //     assert_eq!(2 + 2, 4);
-    // }
 }
