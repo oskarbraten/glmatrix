@@ -3,7 +3,7 @@
 A linear algebra library for computer graphics written in Rust.
 
 ## Goal
-Efficiency and simplicity, with a familiar API for those that are used to the Javascript library known as [glMatrix](https://github.com/toji/gl-matrix).
+This library aims to be easy to use, lightweight, efficient at run-time and with fast compilation times. Additionally it aims to provide an API that is familiar for those that are used to the Javascript library known as [glMatrix](https://github.com/toji/gl-matrix).
 
 ## Features
  - Generic types via the Float-trait in num (without becoming unreadable)
