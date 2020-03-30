@@ -17,6 +17,6 @@ This library aims to be easy to use, lightweight, efficient at run-time and with
 - [x] mat4
 - [x] quat
 - [ ] quat2
-- [ ] vec2
+- [x] vec2
 - [x] vec3
 - [x] vec4
