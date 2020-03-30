@@ -159,6 +159,17 @@ impl<T: Float> Vec3<T> {
     }
 }
 
+impl<T: Float, Index> std::ops::Index<Index> for Vec3<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    type Output = Index::Output;
+
+    fn index(&self, index: Index) -> &Self::Output {
+        &self.elements[index]
+    }
+}
+
 impl<T: Float> Add for Vec3<T> {
     type Output = Self;
     
@@ -268,7 +279,7 @@ impl<T: Float + DivAssign> DivAssign for Vec3<T> {
 }
 
 impl<T: Float> Div<T> for Vec3<T> {
-    type Output = Vec3<T>;
+    type Output = Self;
     
     fn div(self, other: T) -> Self {
         Self::new(
@@ -308,6 +319,14 @@ mod tests {
     fn one() {
         assert_eq!(Vec3::one(), Vec3 { elements: [1.0f32; 3] });
         assert_eq!(Vec3::one(), Vec3 { elements: [1.0f64; 3] });
+    }
+
+    #[test]
+    fn slice() {
+        let v = Vec3::new(1.0, 2.0, 3.0);
+        let a = [1.0, 2.0, 3.0];
+
+        assert_eq!(&v[..], &a[..]);
     }
 
     #[test]

@@ -385,6 +385,17 @@ impl<T: Float> Add for Mat4<T> {
     }
 }
 
+impl<T: Float, Index> std::ops::Index<Index> for Mat4<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    type Output = Index::Output;
+
+    fn index(&self, index: Index) -> &Self::Output {
+        &self.elements[index]
+    }
+}
+
 impl<T: Float + AddAssign> AddAssign for Mat4<T> {
     fn add_assign(&mut self, other: Self) {
         self.elements[0] += other.elements[0];

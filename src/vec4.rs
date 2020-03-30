@@ -151,6 +151,17 @@ impl<T: Float> Vec4<T> {
     }
 }
 
+impl<T: Float, Index> std::ops::Index<Index> for Vec4<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    type Output = Index::Output;
+
+    fn index(&self, index: Index) -> &Self::Output {
+        &self.elements[index]
+    }
+}
+
 impl<T: Float> Add for Vec4<T> {
     type Output = Self;
 

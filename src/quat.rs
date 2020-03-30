@@ -108,6 +108,17 @@ impl<T: Float + MulAssign> Quat<T> {
     }
 }
 
+impl<T: Float, Index> std::ops::Index<Index> for Quat<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    type Output = Index::Output;
+
+    fn index(&self, index: Index) -> &Self::Output {
+        &self.elements[index]
+    }
+}
+
 impl<T: Float + MulAssign> Mul for Quat<T> {
     type Output = Self;
     
