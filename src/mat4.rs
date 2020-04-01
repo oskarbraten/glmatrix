@@ -253,7 +253,7 @@ impl<T: Float> Mat4<T> {
         )
     }
 
-    pub fn from_rotation_translation_scale(r: Quat<T>, t: Vec3<T>, s: Vec3<T>) -> Self {
+    pub fn from_translation_rotation_scale(r: Quat<T>, t: Vec3<T>, s: Vec3<T>) -> Self {
         let [x, y, z, w] = r.elements;
     
         let x2 = x + x;
