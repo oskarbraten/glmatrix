@@ -1,12 +1,12 @@
-use num::Float;
+use num::{Num, Float, Signed};
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Vec2<T: Float> {
+pub struct Vec2<T> {
     pub elements: [T; 2]
 }
 
-impl<T: Float> Vec2<T> {
+impl<T: Num + Copy> Vec2<T> {
     pub fn new(x: T, y: T) -> Self {
         Self {
             elements: [x, y]
@@ -41,6 +41,24 @@ impl<T: Float> Vec2<T> {
         self.elements[1] = value;
     }
     
+    pub fn invert(&mut self) {
+        self.elements[0] = T::one() / self.elements[0];
+        self.elements[1] = T::one() / self.elements[1];
+    }
+    
+    pub fn inverse(&self) -> Self {
+        Self::new(
+            T::one() / self.elements[0],
+            T::one() / self.elements[1]
+        )
+    }
+    
+    pub fn dot(&self, other: &Self) -> T {
+        self.elements[0] * other.elements[0] + self.elements[1] * other.elements[1]
+    }
+}
+
+impl<T: Num + Copy + Float> Vec2<T> {
     pub fn length_squared(&self) -> T {
         self.elements[0].powi(2) + self.elements[1].powi(2)
     }
@@ -63,19 +81,7 @@ impl<T: Float> Vec2<T> {
     pub fn dist(&self, other: &Self) -> T {
         self.dist_squared(other).sqrt()
     }
-    
-    pub fn invert(&mut self) {
-        self.elements[0] = T::one() / self.elements[0];
-        self.elements[1] = T::one() / self.elements[1];
-    }
-    
-    pub fn inverse(&self) -> Self {
-        Self::new(
-            T::one() / self.elements[0],
-            T::one() / self.elements[1]
-        )
-    }
-    
+
     pub fn normalize(&mut self) {
         let mut ls = self.length_squared();
         if ls > T::zero() {
@@ -97,11 +103,7 @@ impl<T: Float> Vec2<T> {
             self.elements[1] * ls
         )
     }
-    
-    pub fn dot(&self, other: &Self) -> T {
-        self.elements[0] * other.elements[0] + self.elements[1] * other.elements[1]
-    }
-    
+
     pub fn lerp(&self, other: &Self, t: T) -> Self {
         let [ax, ay] = self.elements;
         let [bx, by] = other.elements;
@@ -149,7 +151,19 @@ impl<T: Float> Vec2<T> {
     }
 }
 
-impl<T: Float, Index> std::ops::Index<Index> for Vec2<T>
+impl From<Vec2<f32>> for Vec2<f64> {
+    fn from(v: Vec2<f32>) -> Self {
+        Self::new(v.x() as f64, v.y() as f64)
+    }
+}
+
+impl From<Vec2<f64>> for Vec2<f32> {
+    fn from(v: Vec2<f64>) -> Self {
+        Self::new(v.x() as f32, v.y() as f32)
+    }
+}
+
+impl<T, Index> std::ops::Index<Index> for Vec2<T>
 where
     Index: std::slice::SliceIndex<[T]>
 {
@@ -160,7 +174,7 @@ where
     }
 }
 
-impl<T: Float> Add for Vec2<T> {
+impl<T: Num + Copy> Add for Vec2<T> {
     type Output = Self;
     
     fn add(self, other: Self) -> Self {
@@ -171,14 +185,14 @@ impl<T: Float> Add for Vec2<T> {
     }
 }
 
-impl<T: Float + AddAssign> AddAssign for Vec2<T> {
+impl<T: Num + Copy + AddAssign> AddAssign for Vec2<T> {
     fn add_assign(&mut self, other: Self) {
         self.elements[0] += other.elements[0];
         self.elements[1] += other.elements[1];
     }
 }
 
-impl<T: Float> Sub for Vec2<T> {
+impl<T: Num + Copy> Sub for Vec2<T> {
     type Output = Self;
     
     fn sub(self, other: Self) -> Self {
@@ -189,14 +203,14 @@ impl<T: Float> Sub for Vec2<T> {
     }
 }
 
-impl<T: Float + SubAssign> SubAssign for Vec2<T> {
+impl<T: Num + Copy + SubAssign> SubAssign for Vec2<T> {
     fn sub_assign(&mut self, other: Self) {
         self.elements[0] -= other.elements[0];
         self.elements[1] -= other.elements[1];
     }
 }
 
-impl<T: Float> Neg for Vec2<T> {
+impl<T: Num + Copy + Signed> Neg for Vec2<T> {
     type Output = Self;
     
     fn neg(self) -> Self {
@@ -204,7 +218,7 @@ impl<T: Float> Neg for Vec2<T> {
     }
 }
 
-impl<T: Float> Mul for Vec2<T> {
+impl<T: Num + Copy> Mul for Vec2<T> {
     type Output = Self;
     
     fn mul(self, other: Self) -> Self {
@@ -215,14 +229,14 @@ impl<T: Float> Mul for Vec2<T> {
     }
 }
 
-impl<T: Float + MulAssign> MulAssign for Vec2<T> {
+impl<T: Num + Copy + MulAssign> MulAssign for Vec2<T> {
     fn mul_assign(&mut self, other: Self) {
         self.elements[0] *= other.elements[0];
         self.elements[1] *= other.elements[1];
     }
 }
 
-impl<T: Float> Mul<T> for Vec2<T> {
+impl<T: Num + Copy> Mul<T> for Vec2<T> {
     type Output = Self;
     
     fn mul(self, other: T) -> Self {
@@ -233,14 +247,14 @@ impl<T: Float> Mul<T> for Vec2<T> {
     }
 }
 
-impl<T: Float + MulAssign> MulAssign<T> for Vec2<T> {
+impl<T: Num + Copy + MulAssign> MulAssign<T> for Vec2<T> {
     fn mul_assign(&mut self, other: T) {
         self.elements[0] *= other;
         self.elements[1] *= other;
     }
 }
 
-impl<T: Float> Div for Vec2<T> {
+impl<T: Num + Copy> Div for Vec2<T> {
     type Output = Self;
     
     fn div(self, other: Self) -> Self {
@@ -251,14 +265,14 @@ impl<T: Float> Div for Vec2<T> {
     }
 }
 
-impl<T: Float + DivAssign> DivAssign for Vec2<T> {
+impl<T: Num + Copy + DivAssign> DivAssign for Vec2<T> {
     fn div_assign(&mut self, other: Self) {
         self.elements[0] /= other.elements[0];
         self.elements[1] /= other.elements[1];
     }
 }
 
-impl<T: Float> Div<T> for Vec2<T> {
+impl<T: Num + Copy> Div<T> for Vec2<T> {
     type Output = Self;
     
     fn div(self, other: T) -> Self {
@@ -269,7 +283,7 @@ impl<T: Float> Div<T> for Vec2<T> {
     }
 }
 
-impl<T: Float + DivAssign> DivAssign<T> for Vec2<T> {
+impl<T: Num + Copy + DivAssign> DivAssign<T> for Vec2<T> {
     fn div_assign(&mut self, other: T) {
         self.elements[0] /= other;
         self.elements[1] /= other;
@@ -285,6 +299,18 @@ mod tests {
     fn new() {
         assert_eq!(Vec2::new(0.0f32, 0.0), Vec2 { elements: [0.0f32; 2] });
         assert_eq!(Vec2::new(0.0f64, 0.0), Vec2 { elements: [0.0f64; 2] });
+
+        assert_eq!(Vec2::new(0u8, 0u8), Vec2 { elements: [0u8; 2] });
+        assert_eq!(Vec2::new(0u16, 0u16), Vec2 { elements: [0u16; 2] });
+        assert_eq!(Vec2::new(0u32, 0u32), Vec2 { elements: [0u32; 2] });
+        assert_eq!(Vec2::new(0u64, 0u64), Vec2 { elements: [0u64; 2] });
+        assert_eq!(Vec2::new(0u128, 0u128), Vec2 { elements: [0u128; 2] });
+
+        assert_eq!(Vec2::new(0i8, 0i8), Vec2 { elements: [0i8; 2] });
+        assert_eq!(Vec2::new(0i16, 0i16), Vec2 { elements: [0i16; 2] });
+        assert_eq!(Vec2::new(0i32, 0i32), Vec2 { elements: [0i32; 2] });
+        assert_eq!(Vec2::new(0i64, 0i64), Vec2 { elements: [0i64; 2] });
+        assert_eq!(Vec2::new(0i128, 0i128), Vec2 { elements: [0i128; 2] });
     }
 
     #[test]
