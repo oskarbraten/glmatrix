@@ -13,9 +13,41 @@ impl<T: Float + MulAssign> Quat<T> {
             elements: [x, y, z, w]
         }
     }
-    
+
     pub fn identity() -> Self {
         Self::new(T::zero(), T::zero(), T::zero(), T::one())
+    }
+
+    pub fn x(&self) -> T {
+        self.elements[0]
+    }
+
+    pub fn y(&self) -> T {
+        self.elements[1]
+    }
+
+    pub fn z(&self) -> T {
+        self.elements[2]
+    }
+
+    pub fn w(&self) -> T {
+        self.elements[3]
+    }
+
+    pub fn set_x(&mut self, value: T) {
+        self.elements[0] = value;
+    }
+
+    pub fn set_y(&mut self, value: T) {
+        self.elements[1] = value;
+    }
+
+    pub fn set_z(&mut self, value: T) {
+        self.elements[2] = value;
+    }
+
+    pub fn set_w(&mut self, value: T) {
+        self.elements[3] = value;
     }
     
     pub fn from_euler(mut x: T, mut y: T, mut z: T) -> Self {
@@ -105,6 +137,18 @@ impl<T: Float + MulAssign> Quat<T> {
         }
         
         Self::new(self.elements[0] * ls, self.elements[1] * ls, self.elements[2] * ls, self.elements[3] * ls)
+    }
+}
+
+impl From<Quat<f32>> for Quat<f64> {
+    fn from(v: Quat<f32>) -> Self {
+        Self::new(v.x() as f64, v.y() as f64, v.z() as f64, v.w() as f64)
+    }
+}
+
+impl From<Quat<f64>> for Quat<f32> {
+    fn from(v: Quat<f64>) -> Self {
+        Self::new(v.x() as f32, v.y() as f32, v.z() as f32, v.w() as f32)
     }
 }
 
