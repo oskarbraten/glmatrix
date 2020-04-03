@@ -140,6 +140,12 @@ impl<T: Float + MulAssign> Quat<T> {
     }
 }
 
+impl<T: Float + MulAssign> From<[T; 4]> for Quat<T> {
+    fn from(v: [T; 4]) -> Self {
+        Self::new(v[0], v[1], v[2], v[3])
+    }
+}
+
 impl From<Quat<f32>> for Quat<f64> {
     fn from(v: Quat<f32>) -> Self {
         Self::new(v.x() as f64, v.y() as f64, v.z() as f64, v.w() as f64)

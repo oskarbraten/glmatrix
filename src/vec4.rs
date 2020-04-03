@@ -153,6 +153,12 @@ impl<T: Num + Copy + Float> Vec4<T> {
     }
 }
 
+impl<T: Num + Copy> From<[T; 4]> for Vec4<T> {
+    fn from(v: [T; 4]) -> Self {
+        Self::new(v[0], v[1], v[2], v[3])
+    }
+}
+
 impl From<Vec4<f32>> for Vec4<f64> {
     fn from(v: Vec4<f32>) -> Self {
         Self::new(v.x() as f64, v.y() as f64, v.z() as f64, v.w() as f64)
