@@ -6,13 +6,15 @@ pub struct Vec2<T> {
     pub elements: [T; 2]
 }
 
-impl<T: Num + Copy> Vec2<T> {
-    pub fn new(x: T, y: T) -> Self {
+impl<T> Vec2<T> {
+    pub const fn new(x: T, y: T) -> Self {
         Self {
             elements: [x, y]
         }
     }
-    
+}
+
+impl<T: Num + Copy> Vec2<T> {
     pub fn zero() -> Self {
         Self {
             elements: [T::zero(); 2]

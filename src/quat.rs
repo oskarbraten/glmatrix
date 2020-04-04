@@ -3,17 +3,19 @@ use std::ops::{Mul, MulAssign};
 use super::{Vec3, Vec4};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Quat<T: Float> {
+pub struct Quat<T> {
     pub elements: [T; 4]
 }
 
-impl<T: Float + MulAssign> Quat<T> {
-    pub fn new(x: T, y: T, z: T, w: T) -> Self {
+impl<T> Quat<T> {
+    pub const fn new(x: T, y: T, z: T, w: T) -> Self {
         Self {
             elements: [x, y, z, w]
         }
     }
+}
 
+impl<T: Float + MulAssign> Quat<T> {
     pub fn identity() -> Self {
         Self::new(T::zero(), T::zero(), T::zero(), T::one())
     }

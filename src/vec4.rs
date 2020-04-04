@@ -7,13 +7,15 @@ pub struct Vec4<T> {
     pub elements: [T; 4]
 }
 
-impl<T: Num + Copy> Vec4<T> {
-    pub fn new(x: T, y: T, z: T, w: T) -> Self {
+impl<T> Vec4<T> {
+    pub const fn new(x: T, y: T, z: T, w: T) -> Self {
         Self {
             elements: [x, y, z, w]
         }
     }
+}
 
+impl<T: Num + Copy> Vec4<T> {
     pub fn zero() -> Self {
         Self {
             elements: [T::zero(); 4]
