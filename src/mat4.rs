@@ -14,12 +14,84 @@ impl<T> Mat4<T> {
             elements: [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]
         }
     }
+}
 
-    /// Warning! Only gives the correct slice when T contains the bytes you are interested in.
-    /// For instance if you construct a Mat4<Vec<N>> and call .as_bytes() it will not return the actual content of the Vec's.
-    pub fn as_bytes<'a>(&self) -> &'a [u8] {
-        unsafe {
-            std::slice::from_raw_parts(self.elements.as_ptr() as *const u8, self.elements.len() * std::mem::size_of::<T>())
+impl Mat4<f32> {
+    pub fn as_bytes(&self) -> [u8; 64] {
+        let mut bytes = [0u8; 64];
+
+        for (i, v) in self.elements.iter().enumerate() {
+            let offset = i * std::mem::size_of::<f32>();
+
+            let b = v.to_ne_bytes();
+
+            bytes[offset + 0] = b[0];
+            bytes[offset + 1] = b[1];
+            bytes[offset + 2] = b[2];
+            bytes[offset + 3] = b[3];
+        }
+
+        bytes
+    }
+
+    /// Creates a Mat4<f32> from a slice of 64 bytes.
+    pub fn from_bytes(bytes: &[u8; 64]) -> Self {
+        let mut elements = [0.0f32; 16];
+        for i in 0..16 {
+
+            let offset = i * 4;
+            elements[i] = f32::from_ne_bytes([bytes[offset + 0], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]]);
+
+        }
+
+        Self {
+            elements
+        }
+    }
+}
+
+impl Mat4<f64> {
+    pub fn as_bytes(&self) -> [u8; 128] {
+        let mut bytes = [0u8; 128];
+
+        for (i, v) in self.elements.iter().enumerate() {
+            let offset = i * std::mem::size_of::<f64>();
+            let b = v.to_ne_bytes();
+
+            bytes[offset + 0] = b[0];
+            bytes[offset + 1] = b[1];
+            bytes[offset + 2] = b[2];
+            bytes[offset + 3] = b[3];
+            bytes[offset + 4] = b[4];
+            bytes[offset + 5] = b[5];
+            bytes[offset + 6] = b[6];
+            bytes[offset + 7] = b[7];
+        }
+
+        bytes
+    }
+
+    /// Creates a Mat4<f64> from a slice of 128 bytes.
+    pub fn from_bytes(bytes: &[u8; 128]) -> Self {
+        let mut elements = [0.0f64; 16];
+        for i in 0..16 {
+
+            let offset = i * 8;
+            elements[i] = f64::from_ne_bytes([
+                bytes[offset + 0],
+                bytes[offset + 1],
+                bytes[offset + 2],
+                bytes[offset + 3],
+                bytes[offset + 4],
+                bytes[offset + 5],
+                bytes[offset + 6],
+                bytes[offset + 7]
+            ]);
+
+        }
+
+        Self {
+            elements
         }
     }
 }
@@ -573,5 +645,7 @@ mod tests {
         // As bytes
         assert_eq!(m2.as_bytes().len(), 16 * 4); // 32-bit
         assert_eq!(Mat4::<f64>::identity().as_bytes().len(), 16 * 8); // 64-bit
+
+        assert_eq!(m2, Mat4::<f32>::from_bytes(&m2.as_bytes()));
     }
 }

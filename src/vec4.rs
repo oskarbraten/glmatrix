@@ -13,10 +13,84 @@ impl<T> Vec4<T> {
             elements: [x, y, z, w]
         }
     }
+}
 
-    pub fn as_bytes<'a>(&self) -> &'a [u8] {
-        unsafe {
-            std::slice::from_raw_parts(self.elements.as_ptr() as *const u8, self.elements.len() * std::mem::size_of::<T>())
+impl Vec4<f32> {
+    pub fn as_bytes(&self) -> [u8; 16] {
+        let mut bytes = [0u8; 16];
+
+        for (i, v) in self.elements.iter().enumerate() {
+            let offset = i * std::mem::size_of::<f32>();
+
+            let b = v.to_ne_bytes();
+
+            bytes[offset + 0] = b[0];
+            bytes[offset + 1] = b[1];
+            bytes[offset + 2] = b[2];
+            bytes[offset + 3] = b[3];
+        }
+
+        bytes
+    }
+
+    /// Creates a Vec4<f32> from a slice of 16 bytes.
+    pub fn from_bytes(bytes: &[u8; 16]) -> Self {
+        let mut elements = [0.0f32; 4];
+        for i in 0..4 {
+
+            let offset = i * 4;
+            elements[i] = f32::from_ne_bytes([bytes[offset + 0], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]]);
+
+        }
+
+        Self {
+            elements
+        }
+    }
+}
+
+impl Vec4<f64> {
+    pub fn as_bytes(&self) -> [u8; 32] {
+        let mut bytes = [0u8; 32];
+
+        for (i, v) in self.elements.iter().enumerate() {
+            let offset = i * std::mem::size_of::<f64>();
+            let b = v.to_ne_bytes();
+
+            bytes[offset + 0] = b[0];
+            bytes[offset + 1] = b[1];
+            bytes[offset + 2] = b[2];
+            bytes[offset + 3] = b[3];
+            bytes[offset + 4] = b[4];
+            bytes[offset + 5] = b[5];
+            bytes[offset + 6] = b[6];
+            bytes[offset + 7] = b[7];
+        }
+
+        bytes
+    }
+
+    /// Creates a Vec4<f64> from a slice of 32 bytes.
+    pub fn from_bytes(bytes: &[u8; 32]) -> Self {
+        let mut elements = [0.0f64; 4];
+        for i in 0..4 {
+
+            let offset = i * 8;
+            elements[i] = f64::from_ne_bytes([
+                bytes[offset + 0],
+                bytes[offset + 1],
+                bytes[offset + 2],
+                bytes[offset + 3],
+                bytes[offset + 4],
+                bytes[offset + 5],
+                bytes[offset + 6],
+                bytes[offset + 7]
+            ]);
+
+        }
+
+        Self {
+            elements
         }
     }
 }
