@@ -14,6 +14,14 @@ impl<T> Mat4<T> {
             elements: [m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]
         }
     }
+
+    /// Warning! Only gives the correct slice when T contains the bytes you are interested in.
+    /// For instance if you construct a Mat4<Vec<N>> and call .as_bytes() it will not return the actual content of the Vec's.
+    pub fn as_bytes<'a>(&self) -> &'a [u8] {
+        unsafe {
+            std::slice::from_raw_parts(self.elements.as_ptr() as *const u8, self.elements.len() * std::mem::size_of::<T>())
+        }
+    }
 }
 
 impl<T: Float> Mat4<T> {
@@ -529,5 +537,41 @@ impl<T: Float> Mul<Vec4<T>> for Mat4<T> {
             m[2] * other.x() + m[6] * other.y() + m[10] * other.z() + m[14] * other.w(),
             m[3] * other.x() + m[7] * other.y() + m[11] * other.z() + m[15] * other.w()
         )
+    }
+}
+
+
+
+#[cfg(test)]
+mod tests {
+    extern crate nalgebra_glm as glm;
+    use super::*;
+
+    #[test]
+    fn tests() {
+        let m1 = glm::Mat4::new_translation(&glm::vec3(0.0, 0.0, -5.0)) * glm::quat_to_mat4(&glm::Quat::identity()) * glm::Mat4::new_scaling(1.0);
+        let m2 = Mat4::from_translation_rotation_scale(Vec3::new(0.0, 0.0, -5.0), Quat::identity(), Vec3::one());
+
+        // From TRS
+        assert_eq!(m1.as_slice(), &m2[..]);
+
+        let s1 = glm::Mat4::new_translation(&glm::vec3(0.0, 0.0, 5.0));
+        let s2 = Mat4::from_translation(Vec3::new(0.0, 0.0, 5.0));
+
+        // Mul
+        assert_eq!((m1 * s1).as_slice(), &(m2 * s2)[..]);
+
+        let p1 = glm::perspective(4.0/3.0, 75.0, 0.01, 100.0);
+        let p2 = Mat4::perspective(75.0, 4.0/3.0, 0.01, 100.0);
+
+        // Proj
+        assert_eq!((p1 * m1 * s1).as_slice(), &(p2 * m2 * s2)[..]);
+
+        // Inverse
+        assert_eq!((glm::inverse(&(p1 * m1 * s1))).as_slice(), &(p2 * m2 * s2).inverse()[..]);
+
+        // As bytes
+        assert_eq!(m2.as_bytes().len(), 16 * 4); // 32-bit
+        assert_eq!(Mat4::<f64>::identity().as_bytes().len(), 16 * 8); // 64-bit
     }
 }

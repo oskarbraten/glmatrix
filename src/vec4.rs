@@ -13,6 +13,12 @@ impl<T> Vec4<T> {
             elements: [x, y, z, w]
         }
     }
+
+    pub fn as_bytes<'a>(&self) -> &'a [u8] {
+        unsafe {
+            std::slice::from_raw_parts(self.elements.as_ptr() as *const u8, self.elements.len() * std::mem::size_of::<T>())
+        }
+    }
 }
 
 impl<T: Num + Copy> Vec4<T> {

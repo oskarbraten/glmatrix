@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies]
 num = "0.2.1"
+
+[dev-dependencies]
+nalgebra-glm = "0.7.0"
