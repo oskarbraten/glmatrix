@@ -220,8 +220,8 @@ impl<T: Num + Copy + Float> Vec3<T> {
             az + t * (bz - az)
         )
     }
-    
-    pub fn rotate_quat(&mut self, quat: Quat<T>) {
+
+    pub fn rotate_quat(&mut self, quat: &Quat<T>) {
         let [qx, qy, qz, qw] = quat.elements;
         
         let mut uvx = qy * self.elements[2] - qz * self.elements[1];

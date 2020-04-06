@@ -303,7 +303,7 @@ impl<T: Float + MulAssign> Mul<Vec3<T>> for Quat<T> {
     type Output = Vec3<T>;
     
     fn mul(self, mut other: Vec3<T>) -> Vec3<T> {
-        other.rotate_quat(self);
+        other.rotate_quat(&self);
         other
     }
 }
