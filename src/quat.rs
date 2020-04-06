@@ -131,14 +131,14 @@ impl<T: Float + MulAssign> Quat<T> {
     pub fn set_w(&mut self, value: T) {
         self.elements[3] = value;
     }
-    
+
     pub fn from_euler(mut x: T, mut y: T, mut z: T) -> Self {
         let half_to_rad = T::from((0.5 * std::f64::consts::PI) / 180.0).unwrap();
         
         x *= half_to_rad;
         y *= half_to_rad;
         z *= half_to_rad;
-        
+
         let sx = x.sin();
         let cx = x.cos();
         let sy = y.sin();
@@ -146,7 +146,12 @@ impl<T: Float + MulAssign> Quat<T> {
         let sz = z.sin();
         let cz = z.cos();
         
-        Self::new(sx * cy * cz - cx * sy * sz, cx * sy * cz + sx * cy * sz, cx * cy * sz - sx * sy * cz, cx * cy * sz - sx * sy * cz)
+        Self::new(
+            sx * cy * cz - cx * sy * sz,
+            cx * sy * cz + sx * cy * sz,
+            cx * cy * sz - sx * sy * cz,
+            cx * cy * cz + sx * sy * sz
+        )
     }
     
     pub fn from_axis_angle(axis: &Vec3<T>, mut rad: T) -> Self {
