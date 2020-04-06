@@ -478,6 +478,15 @@ where
     }
 }
 
+impl<T, Index> std::ops::IndexMut<Index> for Mat4<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    fn index_mut(&mut self, index: Index) -> &mut Self::Output {
+        &mut self.elements[index]
+    }
+}
+
 impl<T: Float + AddAssign> AddAssign for Mat4<T> {
     fn add_assign(&mut self, other: Self) {
         self.elements[0] += other.elements[0];

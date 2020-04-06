@@ -251,6 +251,15 @@ where
     }
 }
 
+impl<T: Float, Index> std::ops::IndexMut<Index> for Quat<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    fn index_mut(&mut self, index: Index) -> &mut Self::Output {
+        &mut self.elements[index]
+    }
+}
+
 impl<T: Float + MulAssign> Mul for Quat<T> {
     type Output = Self;
     

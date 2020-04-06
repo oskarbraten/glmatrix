@@ -264,6 +264,15 @@ where
     }
 }
 
+impl<T, Index> std::ops::IndexMut<Index> for Vec4<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    fn index_mut(&mut self, index: Index) -> &mut Self::Output {
+        &mut self.elements[index]
+    }
+}
+
 impl<T: Num + Copy> Add for Vec4<T> {
     type Output = Self;
 
