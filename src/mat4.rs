@@ -1,7 +1,7 @@
 use num::Float;
 use std::convert::From;
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign};
-use super::{Vec3, Vec4, Quat};
+use super::{Vec3, Vec4, Quat, Mat3};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Mat4<T> {
@@ -110,7 +110,7 @@ impl<T: Float> Mat4<T> {
         m
     }
     
-    pub fn transpose(&self) -> Self {
+    pub fn transposed(&self) -> Self {
         Self::new(
             self.elements[0],
             self.elements[4],
@@ -211,18 +211,40 @@ impl<T: Float> Mat4<T> {
         )
     }
 
-    pub fn translate(mut self, v: Vec3<T>) -> Self {
+    pub fn translate(&mut self, v: Vec3<T>) {
         let [x, y, z] = v.elements;
 
         self.elements[12] = self.elements[0] * x + self.elements[4] * y + self.elements[8] * z + self.elements[12];
         self.elements[13] = self.elements[1] * x + self.elements[5] * y + self.elements[9] * z + self.elements[13];
         self.elements[14] = self.elements[2] * x + self.elements[6] * y + self.elements[10] * z + self.elements[14];
         self.elements[15] = self.elements[3] * x + self.elements[7] * y + self.elements[11] * z + self.elements[15];
-
-        self
     }
 
-    pub fn scale(mut self, v: Vec3<T>) -> Self {
+    pub fn translated(self, v: Vec3<T>) -> Self {
+        let [x, y, z] = v.elements;
+        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
+        
+        Self::new(
+            a00,
+            a01,
+            a02,
+            a03,
+            a10,
+            a11,
+            a12,
+            a13,
+            a20,
+            a21,
+            a22,
+            a23,
+            a00 * x + a10 * y + a20 * z + a30,
+            a01 * x + a11 * y + a21 * z + a31,
+            a02 * x + a12 * y + a22 * z + a32,
+            a03 * x + a13 * y + a23 * z + a33
+        )
+    }
+
+    pub fn scale(&mut self, v: Vec3<T>) {
         let [x, y, z] = v.elements;
 
         self.elements[0] = self.elements[0] * x;
@@ -237,8 +259,29 @@ impl<T: Float> Mat4<T> {
         self.elements[9] = self.elements[9] * z;
         self.elements[10] = self.elements[10] * z;
         self.elements[11] = self.elements[11] * z;
+    }
 
-        self
+    pub fn scaled(self, v: Vec3<T>) -> Self {
+        let [x, y, z] = v.elements;
+
+        Self::new(
+            self.elements[0] * x,
+            self.elements[1] * x,
+            self.elements[2] * x,
+            self.elements[3] * x,
+            self.elements[4] * y,
+            self.elements[5] * y,
+            self.elements[6] * y,
+            self.elements[7] * y,
+            self.elements[8] * z,
+            self.elements[9] * z,
+            self.elements[10] * z,
+            self.elements[11] * z,
+            self.elements[12],
+            self.elements[13],
+            self.elements[14],
+            self.elements[15]
+        )
     }
 
     pub fn get_translation(&self) -> Vec3<T> {
@@ -431,7 +474,37 @@ impl<T: Float> Mat4<T> {
         )
     }
 
+    /// Calculates a 3x3 normal matrix (transpose inverse) from the 4x4 matrix
+    pub fn normal_matrix(&self) -> Mat3<T> {
+        let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
 
+        let b00 = a00 * a11 - a01 * a10;
+        let b01 = a00 * a12 - a02 * a10;
+        let b02 = a00 * a13 - a03 * a10;
+        let b03 = a01 * a12 - a02 * a11;
+        let b04 = a01 * a13 - a03 * a11;
+        let b05 = a02 * a13 - a03 * a12;
+        let b06 = a20 * a31 - a21 * a30;
+        let b07 = a20 * a32 - a22 * a30;
+        let b08 = a20 * a33 - a23 * a30;
+        let b09 = a21 * a32 - a22 * a31;
+        let b10 = a21 * a33 - a23 * a31;
+        let b11 = a22 * a33 - a23 * a32;
+
+        let inverse_det = T::one() / b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+
+        Mat3::new(
+            (a11 * b11 - a12 * b10 + a13 * b09) * inverse_det,
+            (a12 * b08 - a10 * b11 - a13 * b07) * inverse_det,
+            (a10 * b10 - a11 * b08 + a13 * b06) * inverse_det,
+            (a02 * b10 - a01 * b11 - a03 * b09) * inverse_det,
+            (a00 * b11 - a02 * b08 + a03 * b07) * inverse_det,
+            (a01 * b08 - a00 * b10 - a03 * b06) * inverse_det,
+            (a31 * b05 - a32 * b04 + a33 * b03) * inverse_det,
+            (a32 * b02 - a30 * b05 - a33 * b01) * inverse_det,
+            (a30 * b04 - a31 * b02 + a33 * b00) * inverse_det
+        )
+    }
 }
 
 impl<T: Float> From<[T; 16]> for Mat4<T> {
@@ -439,6 +512,27 @@ impl<T: Float> From<[T; 16]> for Mat4<T> {
         Self {
             elements
         }
+    }
+}
+
+
+impl<T, Index> std::ops::Index<Index> for Mat4<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    type Output = Index::Output;
+
+    fn index(&self, index: Index) -> &Self::Output {
+        &self.elements[index]
+    }
+}
+
+impl<T, Index> std::ops::IndexMut<Index> for Mat4<T>
+where
+    Index: std::slice::SliceIndex<[T]>
+{
+    fn index_mut(&mut self, index: Index) -> &mut Self::Output {
+        &mut self.elements[index]
     }
 }
 
@@ -464,26 +558,6 @@ impl<T: Float> Add for Mat4<T> {
             self.elements[14] + other.elements[14],
             self.elements[15] + other.elements[15]
         )
-    }
-}
-
-impl<T, Index> std::ops::Index<Index> for Mat4<T>
-where
-    Index: std::slice::SliceIndex<[T]>
-{
-    type Output = Index::Output;
-
-    fn index(&self, index: Index) -> &Self::Output {
-        &self.elements[index]
-    }
-}
-
-impl<T, Index> std::ops::IndexMut<Index> for Mat4<T>
-where
-    Index: std::slice::SliceIndex<[T]>
-{
-    fn index_mut(&mut self, index: Index) -> &mut Self::Output {
-        &mut self.elements[index]
     }
 }
 
@@ -621,8 +695,6 @@ impl<T: Float> Mul<Vec4<T>> for Mat4<T> {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     extern crate nalgebra_glm as glm;
@@ -630,8 +702,15 @@ mod tests {
 
     #[test]
     fn tests() {
-        let m1 = glm::Mat4::new_translation(&glm::vec3(0.0, 0.0, -5.0)) * glm::quat_to_mat4(&glm::Quat::identity()) * glm::Mat4::new_scaling(1.0);
-        let m2 = Mat4::from_translation_rotation_scale(Vec3::new(0.0, 0.0, -5.0), Quat::identity(), Vec3::one());
+
+        // Rotation:
+        let r1 = glm::rotate_x(&glm::rotate_y(&glm::rotate_z(&glm::Mat4::identity(), 2.4), 0.2), 1.1);
+        let r2 = Mat4::from_rotation(Quat::from_euler(1.1, 0.2, 2.4));
+
+        assert_eq!(r1.as_slice(), &r2[..]);
+
+        let m1 = glm::Mat4::new_translation(&glm::vec3(0.0, 0.0, -5.0)) * glm::rotate_z(&glm::rotate_y(&glm::rotate_x(&glm::Mat4::identity(), 1.1), 0.2), 2.4) * glm::Mat4::new_scaling(1.0);
+        let m2 = Mat4::from_translation_rotation_scale(Vec3::new(0.0, 0.0, -5.0), Quat::from_euler(1.1, 0.2, 2.4), Vec3::one());
 
         // From TRS
         assert_eq!(m1.as_slice(), &m2[..]);
