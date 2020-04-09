@@ -474,6 +474,11 @@ impl<T: Float> Mat4<T> {
         )
     }
 
+    /// Extracts the direction vector from the matrix.
+    pub fn direction(&self) -> Vec3<T> {
+        Vec3::new(self[8], self[9], self[10])
+    }
+
     /// Calculates a 3x3 normal matrix (transpose inverse) from the 4x4 matrix
     pub fn normal_matrix(&self) -> Mat3<T> {
         let [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = self.elements;
