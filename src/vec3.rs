@@ -15,6 +15,26 @@ impl<T> Vec3<T> {
     }
 }
 
+impl<T> From<[T; 3]> for Vec3<T> {
+    fn from(elements: [T; 3]) -> Self {
+        Self {
+            elements
+        }
+    }
+}
+
+impl From<Vec3<f32>> for Vec3<f64> {
+    fn from(v: Vec3<f32>) -> Self {
+        Self::new(v.x() as f64, v.y() as f64, v.z() as f64)
+    }
+}
+
+impl From<Vec3<f64>> for Vec3<f32> {
+    fn from(v: Vec3<f64>) -> Self {
+        Self::new(v.x() as f32, v.y() as f32, v.z() as f32)
+    }
+}
+
 impl Vec3<f32> {
     pub fn as_bytes(&self) -> [u8; 12] {
         let mut bytes = [0u8; 12];
@@ -240,24 +260,6 @@ impl<T: Num + Copy + Float> Vec3<T> {
         self.elements[0] = self.elements[0] + uvx + uuvx;
         self.elements[1] = self.elements[1] + uvy + uuvy;
         self.elements[2] = self.elements[2] + uvz + uuvz;
-    }
-}
-
-impl<T: Num + Copy> From<[T; 3]> for Vec3<T> {
-    fn from(v: [T; 3]) -> Self {
-        Self::new(v[0], v[1], v[2])
-    }
-}
-
-impl From<Vec3<f32>> for Vec3<f64> {
-    fn from(v: Vec3<f32>) -> Self {
-        Self::new(v.x() as f64, v.y() as f64, v.z() as f64)
-    }
-}
-
-impl From<Vec3<f64>> for Vec3<f32> {
-    fn from(v: Vec3<f64>) -> Self {
-        Self::new(v.x() as f32, v.y() as f32, v.z() as f32)
     }
 }
 

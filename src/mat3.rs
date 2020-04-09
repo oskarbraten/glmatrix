@@ -1,7 +1,7 @@
-use num::Float;
+use num::{Num, Float};
 use std::convert::From;
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign};
-use super::{Vec2, Vec3, Vec4, Quat};
+use super::{Vec2, Mat4};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Mat3<T> {
@@ -13,6 +13,27 @@ impl<T> Mat3<T> {
         Self {
             elements: [m00, m01, m02, m10, m11, m12, m20, m21, m22]
         }
+    }
+}
+
+impl<T> From<[T; 9]> for Mat3<T> {
+    fn from(elements: [T; 9]) -> Self {
+        Self {
+            elements
+        }
+    }
+}
+
+impl<T: Num + Copy> Mat3<T> {
+    /// Converts the matrix to a Mat4<T> by padding with zeros.
+    /// Useful when the data layout of the target is defined as std140.
+    pub fn as_mat4(self) -> Mat4<T> {
+        Mat4::new(
+            self.elements[0], self.elements[1], self.elements[2], T::zero(),
+            self.elements[3], self.elements[4], self.elements[5], T::zero(), 
+            self.elements[6], self.elements[7], self.elements[8], T::zero(),
+            T::zero(), T::zero(), T::zero(), T::zero()
+        )
     }
 }
 
@@ -308,14 +329,6 @@ impl<T: Float> Mat3<T> {
             T::zero(),
             T::one()
         )
-    }
-}
-
-impl<T: Float> From<[T; 9]> for Mat3<T> {
-    fn from(elements: [T; 9]) -> Self {
-        Self {
-            elements
-        }
     }
 }
 

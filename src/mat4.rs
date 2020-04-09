@@ -16,6 +16,14 @@ impl<T> Mat4<T> {
     }
 }
 
+impl<T> From<[T; 16]> for Mat4<T> {
+    fn from(elements: [T; 16]) -> Self {
+        Self {
+            elements
+        }
+    }
+}
+
 impl Mat4<f32> {
     pub fn as_bytes(&self) -> [u8; 64] {
         let mut bytes = [0u8; 64];
@@ -511,15 +519,6 @@ impl<T: Float> Mat4<T> {
         )
     }
 }
-
-impl<T: Float> From<[T; 16]> for Mat4<T> {
-    fn from(elements: [T; 16]) -> Self {
-        Self {
-            elements
-        }
-    }
-}
-
 
 impl<T, Index> std::ops::Index<Index> for Mat4<T>
 where

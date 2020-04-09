@@ -15,6 +15,26 @@ impl<T> Quat<T> {
     }
 }
 
+impl<T> From<[T; 4]> for Quat<T> {
+    fn from(elements: [T; 4]) -> Self {
+        Self {
+            elements
+        }
+    }
+}
+
+impl From<Quat<f32>> for Quat<f64> {
+    fn from(v: Quat<f32>) -> Self {
+        Self::new(v.x() as f64, v.y() as f64, v.z() as f64, v.w() as f64)
+    }
+}
+
+impl From<Quat<f64>> for Quat<f32> {
+    fn from(v: Quat<f64>) -> Self {
+        Self::new(v.x() as f32, v.y() as f32, v.z() as f32, v.w() as f32)
+    }
+}
+
 impl Quat<f32> {
     pub fn as_bytes(&self) -> [u8; 16] {
         let mut bytes = [0u8; 16];
@@ -227,25 +247,7 @@ impl<T: Float + MulAssign> Quat<T> {
     }
 }
 
-impl<T: Float + MulAssign> From<[T; 4]> for Quat<T> {
-    fn from(v: [T; 4]) -> Self {
-        Self::new(v[0], v[1], v[2], v[3])
-    }
-}
-
-impl From<Quat<f32>> for Quat<f64> {
-    fn from(v: Quat<f32>) -> Self {
-        Self::new(v.x() as f64, v.y() as f64, v.z() as f64, v.w() as f64)
-    }
-}
-
-impl From<Quat<f64>> for Quat<f32> {
-    fn from(v: Quat<f64>) -> Self {
-        Self::new(v.x() as f32, v.y() as f32, v.z() as f32, v.w() as f32)
-    }
-}
-
-impl<T: Float, Index> std::ops::Index<Index> for Quat<T>
+impl<T, Index> std::ops::Index<Index> for Quat<T>
 where
     Index: std::slice::SliceIndex<[T]>
 {
@@ -256,7 +258,7 @@ where
     }
 }
 
-impl<T: Float, Index> std::ops::IndexMut<Index> for Quat<T>
+impl<T, Index> std::ops::IndexMut<Index> for Quat<T>
 where
     Index: std::slice::SliceIndex<[T]>
 {

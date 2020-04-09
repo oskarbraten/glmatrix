@@ -14,6 +14,26 @@ impl<T> Vec2<T> {
     }
 }
 
+impl<T> From<[T; 2]> for Vec2<T> {
+    fn from(elements: [T; 2]) -> Self {
+        Self {
+            elements
+        }
+    }
+}
+
+impl From<Vec2<f32>> for Vec2<f64> {
+    fn from(v: Vec2<f32>) -> Self {
+        Self::new(v.x() as f64, v.y() as f64)
+    }
+}
+
+impl From<Vec2<f64>> for Vec2<f32> {
+    fn from(v: Vec2<f64>) -> Self {
+        Self::new(v.x() as f32, v.y() as f32)
+    }
+}
+
 impl Vec2<f32> {
     pub fn as_bytes(&self) -> [u8; 8] {
         let mut bytes = [0u8; 8];
@@ -230,24 +250,6 @@ impl<T: Num + Copy + Float> Vec2<T> {
         };
 
         num::clamp(cos, -T::one(), T::one()).acos()
-    }
-}
-
-impl<T: Num + Copy> From<[T; 2]> for Vec2<T> {
-    fn from(v: [T; 2]) -> Self {
-        Self::new(v[0], v[1])
-    }
-}
-
-impl From<Vec2<f32>> for Vec2<f64> {
-    fn from(v: Vec2<f32>) -> Self {
-        Self::new(v.x() as f64, v.y() as f64)
-    }
-}
-
-impl From<Vec2<f64>> for Vec2<f32> {
-    fn from(v: Vec2<f64>) -> Self {
-        Self::new(v.x() as f32, v.y() as f32)
     }
 }
 

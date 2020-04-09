@@ -15,6 +15,26 @@ impl<T> Vec4<T> {
     }
 }
 
+impl<T> From<[T; 4]> for Vec4<T> {
+    fn from(elements: [T; 4]) -> Self {
+        Self {
+            elements
+        }
+    }
+}
+
+impl From<Vec4<f32>> for Vec4<f64> {
+    fn from(v: Vec4<f32>) -> Self {
+        Self::new(v.x() as f64, v.y() as f64, v.z() as f64, v.w() as f64)
+    }
+}
+
+impl From<Vec4<f64>> for Vec4<f32> {
+    fn from(v: Vec4<f64>) -> Self {
+        Self::new(v.x() as f32, v.y() as f32, v.z() as f32, v.w() as f32)
+    }
+}
+
 impl Vec4<f32> {
     pub fn as_bytes(&self) -> [u8; 16] {
         let mut bytes = [0u8; 16];
@@ -232,24 +252,6 @@ impl<T: Num + Copy + Float> Vec4<T> {
         self.elements[0] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
         self.elements[1] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
         self.elements[2] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
-    }
-}
-
-impl<T: Num + Copy> From<[T; 4]> for Vec4<T> {
-    fn from(v: [T; 4]) -> Self {
-        Self::new(v[0], v[1], v[2], v[3])
-    }
-}
-
-impl From<Vec4<f32>> for Vec4<f64> {
-    fn from(v: Vec4<f32>) -> Self {
-        Self::new(v.x() as f64, v.y() as f64, v.z() as f64, v.w() as f64)
-    }
-}
-
-impl From<Vec4<f64>> for Vec4<f32> {
-    fn from(v: Vec4<f64>) -> Self {
-        Self::new(v.x() as f32, v.y() as f32, v.z() as f32, v.w() as f32)
     }
 }
 
