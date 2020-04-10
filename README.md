@@ -13,7 +13,7 @@ This library aims to be easy to use, lightweight, efficient at run-time and with
 ## Todo
 - [ ] mat2
 - [ ] mat2d
-- [ ] mat3
+- [x] mat3
 - [x] mat4
 - [x] quat
 - [ ] quat2
